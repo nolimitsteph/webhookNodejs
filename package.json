@@ -1,0 +1,22 @@
+{
+  "name": "webhooknodejs",
+  "version": "1.0.0",
+  "description": "webhook in nodejs using express framework - whatsapp cloud api",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "hello",
+    "world"
+  ],
+  "author": "stepnane nigaba",
+  "license": "ISC",
+  "dependencies": {
+    "@ngrok/ngrok": "^1.7.0",
+    "axios": "^1.20.0",
+    "body-parser": "^2.3.0",
+    "dotenv": "^18.0.5",
+    "express": "^5.2.1"
+  }
+}

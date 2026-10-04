@@ -70,14 +70,14 @@ app.post("/webhook", async(req, res) => {
             }
             
 
-            if(messages.text.body.toLowerCase() === "list") {
+            else if(messages.text.body.toLowerCase() === "list") {
                 sendList(messages.from);
             }
-            if(messages.text.body.toLowerCase() === "reply button") {
+            else if(messages.text.body.toLowerCase() === "reply button") {
                 sendReplybutton(messages.from);
             }
             else {
-                await sendList(messages);
+                await sendList(messages.from);
             }
         }
         if(messages.type === "interactive"){

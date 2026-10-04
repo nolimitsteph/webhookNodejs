@@ -68,6 +68,9 @@ app.post("/webhook", async(req, res) => {
                 await sendList(messages.from);
                 await sendReplybutton(messages.from);
             }
+            else {
+                await sendList(messages);
+            }
 
             if(messages.text.body.toLowerCase() === "list") {
                 sendList(messages.from);

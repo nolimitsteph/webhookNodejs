@@ -1,10 +1,10 @@
 const express = require('express');
 const axios = require('axios');
-const ngrok = require('@ngrok/ngrok');
+// const ngrok = require('@ngrok/ngrok');
 require('dotenv').config();
 
-const WEBHOOK_VERIFY_TOKEN = process.env.MYTOKEN || 'freediddy';
-const WHATAPP_ACCESS_TOKEN = process.env.TOKEN || 'EAAgmF5G7TQ4BSsDJ09j3H1Tx6hZAvcXHyeHS5yqihn3cRjzapjHXzXPd5pZCF8eIrTcMgySsANlBn2NXrCzctxEP8zhFc8cyDKlNPqfBpTgz2LGauTev7ZBONZBIU0WZBcFUZAgOLXhxwDUSXxBAYZBV0UZALrS1ERz1UqwCV7yLonyUCVE7DYFJUiXEDc35CAZDZD';
+const WEBHOOK_VERIFY_TOKEN = process.env.MYTOKEN ;
+const WHATAPP_ACCESS_TOKEN = process.env.TOKEN;
 
 const app = express();
 
@@ -274,19 +274,18 @@ async function sendReplybutton(to){
     console.log(`Message sent to ${to}`);
 }
 
-async function forwardToApp() {
-	const forwarder = await ngrok.forward({
-		addr: "localhost:8085",
-		authtoken_from_env: true,
-		domain: "washer-populate-footboard.ngrok-free.dev",
-	});
-	console.log(`Available at: ${forwarder.url()}`);
-}
+// async function forwardToApp() {
+// 	const forwarder = await ngrok.forward({
+// 		addr: "localhost:8085",
+// 		authtoken_from_env: true,
+// 		domain: "washer-populate-footboard.ngrok-free.dev",
+// 	});
+// 	console.log(`Available at: ${forwarder.url()}`);
+// }
  
 //ngrok will forward the requests to my local server running on port 8085(tunneling because i don't have a public ip)
-app.listen(8085, () => {
+app.listen(8085,'0.0.0.0', () => {
   console.log("Webserver running on port 8085");
-  forwardToApp();;
 });
 
 

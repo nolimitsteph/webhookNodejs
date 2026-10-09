@@ -1,10 +1,31 @@
 const express = require('express');
 const axios = require('axios');
+const crypto = require('crypto');
+const Groq = require('groq-sdk');
+const {GoogleGenAI} = require('@google/genai');
+
 // const ngrok = require('@ngrok/ngrok');
 require('dotenv').config();
 
 const WEBHOOK_VERIFY_TOKEN = process.env.MYTOKEN ;
 const WHATAPP_ACCESS_TOKEN = process.env.TOKEN;
+const aiGemini = process.env.GEMINI_API_KEY ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }) : null;
+const aiGroq = process.env.GROQ_API_KEY ? new Groq({apiKey: process.env.GROQ_API_KEY}) : null;
+
+const schoolHostels = {
+    
+        newBLock : {"name": "New Block",
+        "Location": "Facing cafelatta",
+        "type": "mixed"},
+    
+        oldBlock : {
+        "name": "Old block",
+        "Location": "Near cafelatta",
+        "type": "mixed",}
+    
+}
+
+
 
 const app = express();
 
@@ -44,6 +65,12 @@ app.post("/webhook", async(req, res) => {
     // Extraction sécurisée du contenu de la valeur
     const value = changes[0].value;
 
+    const messageAge = Math.floor(Date.now() / 1000) - Number(message.timestamp);
+    if (messageAge > MAX_MESSAGE_AGE_SECONDS) {
+        console.log(`Ignored old message (${messageAge}s old)`);
+        return res.sendStatus(200);
+    }
+
     // 2. CORRECTION : Extraction correcte des objets (sans accolades destructurantes au mauvais endroit)
     const statuses = value.statuses ? value.statuses[0] : null;
     const messages = value.messages ? value.messages[0] : null;
@@ -77,7 +104,9 @@ app.post("/webhook", async(req, res) => {
                 sendReplybutton(messages.from);
             }
             else {
-                await sendList(messages.from);
+                console.log(`Processing open query via Digital Health AI: "${messages.text.body}"`);
+                const aiResponse = await getCascadingAIResponse(messages.text.body);
+                await replyMessage(messages.from, aiResponse, messages.id);
             }
         }
         if(messages.type === "interactive"){
@@ -118,6 +147,44 @@ async function sendMessage(to, body){
     });
     console.log(`Message sent to ${to}: ${body}`);
 }
+
+async function getCascadingAIResponse(prompt) {
+    // Le prompt système qui verrouille le contexte médical de l'hôpital
+    const contextPrompt = `You are the specialized AI supposed to give info about USIU africa `;
+    // PLAN A : Tentative avec Google Gemini Flash
+    if (aiGemini) {
+        try {
+            console.log(" Route: Attempting extraction via Gemini Flash...");
+            const response = await aiGemini.models.generateContent({
+                model: 'gemini-1.5-flash',
+                contents: contextPrompt,
+            });
+            if (response?.text) return response.text.trim();
+        } catch (err) {
+            console.warn("⚠️ Gemini Primary route collapsed, switching context to Groq...", err.message);
+        }
+    }
+
+    // PLAN B : Sécurité avec Groq Llama 3 si le plan A échoue
+    if (aiGroq) {
+        try {
+            console.log("🔵 Route: Executing backup pipeline via Groq Llama 3...");
+            const chatCompletion = await aiGroq.chat.completions.create({
+                messages: [{ role: "user", content: contextPrompt }],
+                model: "llama3-8b-8192",
+            });
+            if (chatCompletion.choices?.[0]?.message?.content) {
+                return chatCompletion.choices[0].message.content.trim();
+            }
+        } catch (err) {
+            console.error("❌ Both AI engines failed to generate a response:", err.message);
+        }
+    }
+
+    // REPLI SÉCURISÉ : Si aucune IA ne répond
+    return `Thank you for reaching out to ${FACILITY.name}. We received your prompt, but our AI lines are heavily congested right now. Please reply with "menu" to use our instant Room Navigation tool or call us at ${FACILITY.phone}.`;
+}
+
 
 async function replyMessage(to, body, messageId){
     await axios({

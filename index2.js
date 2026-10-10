@@ -254,21 +254,23 @@ async function getCascadingAIResponse(prompt) {
 
     if (aiGemini) {
         try {console.log(" Route: Attempting extraction via Gemini Flash...");
-const response = await aiGemini.models.generateContent({
-model: 'gemini-1.5-flash',
-contents: contextPrompt,
-});
-if (response?.text) return response.text.trim();
-} catch (err) {
-console.warn(" Gemini Primary route collapsed, switching context to Groq...", err.message);
-}
-}
-if (aiGroq) {
-try {
-console.log(" Route: Executing backup pipeline via Groq Llama 3...");
-const chatCompletion = await aiGroq.chat.completions.create({
-messages: [{ role: "user", content: contextPrompt }],
-model: "llama3-8b-8192",
+            const response = await aiGemini.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: contextPrompt,});
+
+            if (response?.text) return response.text.trim();
+        } 
+        catch (err) {
+        console.warn(" Gemini Primary route collapsed, switching context to Groq...", err.message);
+        }
+    }
+
+    if (aiGroq) {
+    try {
+        console.log(" Route: Executing backup pipeline via Groq Llama 3...");
+        const chatCompletion = await aiGroq.chat.completions.create({
+        messages: [{ role: "user", content: contextPrompt }],
+        model: "llama-3.1-8b-instant",
 });
 if (chatCompletion.choices && chatCompletion.choices[0]?.message?.content) {
 return chatCompletion.choices[0].message.content.trim();

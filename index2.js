@@ -255,7 +255,7 @@ async function getCascadingAIResponse(prompt) {
     if (aiGemini) {
         try {console.log(" Route: Attempting extraction via Gemini Flash...");
             const response = await aiGemini.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-3.8-flash',
             contents: contextPrompt,});
 
             if (response?.text) return response.text.trim();
@@ -270,7 +270,7 @@ async function getCascadingAIResponse(prompt) {
         console.log(" Route: Executing backup pipeline via Groq Llama 3...");
         const chatCompletion = await aiGroq.chat.completions.create({
         messages: [{ role: "user", content: contextPrompt }],
-        model: "llama-3.1-8b-instant",
+        model: "qwen/qwen3.6-27b",
 });
 if (chatCompletion.choices && chatCompletion.choices[0]?.message?.content) {
 return chatCompletion.choices[0].message.content.trim();

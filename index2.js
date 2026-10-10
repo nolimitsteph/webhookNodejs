@@ -177,7 +177,7 @@ async function getCascadingAIResponse(prompt) {
                 return chatCompletion.choices[0].message.content.trim();
             }
         } catch (err) {
-            console.error("❌ Both AI engines failed to generate a response:", err.message);
+            console.error(" Both AI engines failed to generate a response:", err.message);
         }
     }
 
@@ -357,6 +357,7 @@ async function sendReplybutton(to){
 //ngrok will forward the requests to my local server running on port 8085(tunneling because i don't have a public ip)
 app.listen(8085,'0.0.0.0', () => {
   console.log("Webserver running on port 8085");
+  sendMessage("254794195858", "hello nigga")
 });
 
 
